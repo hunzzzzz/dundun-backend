@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: dundun-backend
+
+---
+
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+
+---
+
+server:
+  port: 8081
