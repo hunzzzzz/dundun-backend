@@ -80,4 +80,14 @@ enum class ErrorCode(
         httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
         message = "구글 로그인 중 토큰 발급 과정에서 오류가 발생했습니다."
     ),
+    INVALID_REFRESH_TOKEN(
+        code = "AUTH10",
+        httpStatus = HttpStatus.UNAUTHORIZED,
+        message = "올바르지 않은 재발급 토큰입니다. 다시 로그인해 주세요."
+    ),
+    EXPIRED_USER_INFO(
+        code = "AUTH11",
+        httpStatus = HttpStatus.UNAUTHORIZED,
+        message = "사용자 정보가 만료되었습니다. 다시 로그인해 주세요."
+    ),
 }

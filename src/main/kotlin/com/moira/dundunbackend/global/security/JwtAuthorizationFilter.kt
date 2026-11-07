@@ -29,6 +29,8 @@ class JwtAuthorizationFilter(
         // 로그인
         PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/login/**"),
         PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/login/**"),
+        // 로그아웃
+        PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/logout/**"),
         // 토큰 재발급
         PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/token/reissue")
     )

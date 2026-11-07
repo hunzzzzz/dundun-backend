@@ -71,4 +71,18 @@ class LoginTxService(
             user.refreshToken = TokenHasher.sha256(refreshToken)
         }
     }
+
+    /**
+     * User의 refreshToken 초기화
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun nullRefreshToken(userId: String) {
+        // 1. User 재조회
+        val user = userRepository.findByIdOrNull(userId)
+
+        // 2. refreshToken 초기화
+        if (user != null) {
+            user.refreshToken = null
+        }
+    }
 }
