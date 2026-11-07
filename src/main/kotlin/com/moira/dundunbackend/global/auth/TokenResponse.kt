@@ -1,4 +1,4 @@
-package com.moira.dundunbackend.global.security
+package com.moira.dundunbackend.global.auth
 
 data class TokenResponse(
     val grantType: String,

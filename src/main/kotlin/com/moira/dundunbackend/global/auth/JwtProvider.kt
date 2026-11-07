@@ -1,4 +1,4 @@
-package com.moira.dundunbackend.global.security
+package com.moira.dundunbackend.global.auth
 
 import com.moira.dundunbackend.domain.user.entity.User
 import com.moira.dundunbackend.global.common.CommonVariables.BEARER
