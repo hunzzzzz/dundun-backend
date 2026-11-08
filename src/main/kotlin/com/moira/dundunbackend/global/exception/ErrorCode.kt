@@ -90,4 +90,31 @@ enum class ErrorCode(
         httpStatus = HttpStatus.UNAUTHORIZED,
         message = "사용자 정보가 만료되었습니다. 다시 로그인해 주세요."
     ),
+
+    // 사용자
+    NO_USER_GROUP_NAME(
+        code = "USER01",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "그룹명은 필수 입력 항목입니다."
+    ),
+    INVALID_USER_GROUP_NAME_SIZE(
+        code = "USER02",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "그룹명은 2~20글자이어야 합니다."
+    ),
+    CAN_JOIN_MAX_5_GROUP(
+        code = "USER03",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "최대 5개의 그룹까지 참여할 수 있습니다."
+    ),
+    USER_GROUP_NOT_FOUND(
+        code = "USER04",
+        httpStatus = HttpStatus.FORBIDDEN,
+        message = "존재하지 않는 그룹입니다."
+    ),
+    USER_GROUP_MEMBERS_NOT_FOUND(
+        code = "USER05",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "그룹 멤버 목록을 조회할 수 없습니다."
+    )
 }

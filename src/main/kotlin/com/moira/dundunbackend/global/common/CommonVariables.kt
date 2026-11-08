@@ -20,4 +20,6 @@ object CommonVariables {
     const val GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
     const val GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
     const val GOOGLE_USER_INFO_URL = "https://openidconnect.googleapis.com/v1/userinfo"
+
+    const val GROUP_JOIN_MAX_COUNT = 5
 }

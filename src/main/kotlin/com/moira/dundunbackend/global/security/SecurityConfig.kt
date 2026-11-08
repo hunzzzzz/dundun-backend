@@ -68,7 +68,7 @@ class SecurityConfig(
                 authorize(HttpMethod.GET, "/api/login/**", permitAll)
                 authorize(HttpMethod.POST, "/api/login/**", permitAll)
                 // 로그아웃
-                authorize(HttpMethod.POST, "api/logout/**", permitAll)
+                authorize(HttpMethod.POST, "/api/logout/**", permitAll)
                 // 토큰 재발급
                 authorize(HttpMethod.POST, "/api/token/reissue", permitAll)
                 // 나머지 요청은 인증 필수

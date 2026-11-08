@@ -5,6 +5,7 @@ import com.moira.dundunbackend.domain.user.entity.UserOauthProvider
 object CommonUtils {
     private const val USER_IDENTIFIER = "ur"
     private const val FILE_IDENTIFIER = "fe"
+    private const val GROUP_IDENTIFIER = "gp"
     private val ALLOWED_CHARS = buildList {
         addAll(('A'..'Z').toList())
         addAll(('a'..'z').toList())
@@ -24,6 +25,7 @@ object CommonUtils {
 
     fun createUserId() = this.createRandomId(USER_IDENTIFIER)
     fun createFileId() = this.createRandomId(FILE_IDENTIFIER)
+    fun createGroupId() = this.createRandomId(GROUP_IDENTIFIER)
 
     /**
      * 랜덤 닉네임 생성
