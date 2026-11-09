@@ -1,6 +1,8 @@
 package com.moira.dundunbackend.global.common
 
 import com.moira.dundunbackend.domain.user.entity.UserOauthProvider
+import java.security.SecureRandom
+import kotlin.random.asKotlinRandom
 
 object CommonUtils {
     private const val USER_IDENTIFIER = "ur"
@@ -11,13 +13,14 @@ object CommonUtils {
         addAll(('a'..'z').toList())
         addAll(('0'..'9').toList())
     }
+    private val secureRandom = SecureRandom().asKotlinRandom()
 
     /**
      * 랜덤 ID 생성
      */
     private fun createRandomId(identifier: String): String {
         val randomPart = (1..10)
-            .map { ALLOWED_CHARS.random() }
+            .map { ALLOWED_CHARS.random(secureRandom) }
             .joinToString("")
 
         return "$identifier$randomPart"
@@ -32,6 +35,12 @@ object CommonUtils {
      */
     fun generateRandomNickname(oauthProvider: UserOauthProvider, oauthNickname: String?) =
         "${oauthProvider.name}_${oauthNickname ?: "사용자"}_${(0..99999).random().toString().padStart(5, '0')}"
+
+
+    /**
+     * 랜덤 초대코드 생성
+     */
+    fun generateInviteCode() = (1..10).map { ALLOWED_CHARS.random(secureRandom) }.joinToString("")
 
     /**
      * Enum 값 검증

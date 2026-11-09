@@ -9,7 +9,10 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface UserGroupMemberRepository : JpaRepository<UserGroupMember, UserGroupMemberId> {
+    fun existsByUserIdAndGroupId(userId: String, groupId: String): Boolean
+    fun countByGroupId(groupId: String): Int
     fun countByUserId(userId: String): Int
+    fun deleteByUserIdAndGroupId(userId: String, groupId: String)
 
     @Query(
         """

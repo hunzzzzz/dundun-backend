@@ -22,4 +22,5 @@ object CommonVariables {
     const val GOOGLE_USER_INFO_URL = "https://openidconnect.googleapis.com/v1/userinfo"
 
     const val GROUP_JOIN_MAX_COUNT = 5
+    const val GROUP_MEMBERS_MAX_COUNT = 10
 }

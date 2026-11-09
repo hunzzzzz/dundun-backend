@@ -20,11 +20,12 @@ CREATE TABLE dundun.user
 -- USER_GROUP
 CREATE TABLE dundun.user_group
 (
-    group_id     VARCHAR(50) PRIMARY KEY,
-    name         VARCHAR(100) NOT NULL,
-    member_count INT          NOT NULL CHECK (member_count BETWEEN 0 AND 10),
-    created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+    group_id                 VARCHAR(50) PRIMARY KEY,
+    name                     VARCHAR(100) NOT NULL,
+    invite_code              VARCHAR(10)  NOT NULL UNIQUE,
+    invite_code_refresh_date DATE         NOT NULL,
+    created_at               TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at               TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- USER_GROUP_MEMBER

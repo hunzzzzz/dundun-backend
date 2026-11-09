@@ -45,16 +45,17 @@ class User(
     var refreshToken: String? = null,
 ) : BaseEntity() {
     companion object {
-        fun createKakaoUser(
+        fun create(
             userId: String,
             oauthId: String,
+            oauthProvider: UserOauthProvider,
             email: String?,
             newNickname: String,
         ): User {
             return User(
                 userId = userId,
                 oauthId = oauthId,
-                oauthProvider = UserOauthProvider.KAKAO,
+                oauthProvider = oauthProvider,
                 email = email,
                 nickname = newNickname
             )

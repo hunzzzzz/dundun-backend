@@ -34,9 +34,10 @@ class LoginTxService(
         } while (userRepository.existsByNickname(newNickname))
 
         // 2. User 저장
-        val newUser = User.createKakaoUser(
+        val newUser = User.create(
             userId = CommonUtils.createUserId(),
             oauthId = oauthId,
+            oauthProvider = oauthProvider,
             email = email,
             newNickname = newNickname
         ).let { userRepository.save(it) }

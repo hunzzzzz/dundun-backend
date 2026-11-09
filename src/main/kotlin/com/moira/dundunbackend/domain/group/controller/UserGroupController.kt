@@ -1,8 +1,10 @@
 package com.moira.dundunbackend.domain.group.controller
 
 import com.moira.dundunbackend.domain.group.dto.request.UserGroupCreateRequest
+import com.moira.dundunbackend.domain.group.dto.request.UserGroupJoinRequest
 import com.moira.dundunbackend.domain.group.dto.request.UserGroupUpdateRequest
 import com.moira.dundunbackend.domain.group.dto.response.UserGroupIdResponse
+import com.moira.dundunbackend.domain.group.dto.response.UserGroupInviteCodeResponse
 import com.moira.dundunbackend.domain.group.dto.response.UserGroupMemberResponse
 import com.moira.dundunbackend.domain.group.dto.response.UserGroupResponse
 import com.moira.dundunbackend.domain.group.service.UserGroupService
@@ -65,5 +67,44 @@ class UserGroupController(
         userGroupService.update(userId, groupId, request)
 
         return ResponseEntity.ok(null)
+    }
+
+    /**
+     * 그룹 탈퇴
+     */
+    @DeleteMapping("/api/groups/{groupId}")
+    fun leave(
+        @AuthenticationPrincipal userId: String,
+        @PathVariable groupId: String
+    ): ResponseEntity<Nothing> {
+        userGroupService.leave(userId, groupId)
+
+        return ResponseEntity.ok(null)
+    }
+
+    /**
+     * 그룹 초대코드 조회
+     */
+    @GetMapping("/api/groups/{groupId}/invite-code")
+    fun getInviteCode(
+        @AuthenticationPrincipal userId: String,
+        @PathVariable groupId: String
+    ): ResponseEntity<UserGroupInviteCodeResponse> {
+        val response = userGroupService.getInviteCode(userId, groupId)
+
+        return ResponseEntity.ok(response)
+    }
+
+    /**
+     * 그룹 참여
+     */
+    @PostMapping("/api/groups/join")
+    fun join(
+        @AuthenticationPrincipal userId: String,
+        @Valid @RequestBody request: UserGroupJoinRequest
+    ): ResponseEntity<UserGroupIdResponse> {
+        val response = userGroupService.join(userId, request)
+
+        return ResponseEntity.ok(response)
     }
 }

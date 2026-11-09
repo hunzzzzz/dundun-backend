@@ -114,7 +114,42 @@ enum class ErrorCode(
     ),
     USER_GROUP_MEMBERS_NOT_FOUND(
         code = "USER05",
-        httpStatus = HttpStatus.BAD_REQUEST,
+        httpStatus = HttpStatus.FORBIDDEN,
         message = "그룹 멤버 목록을 조회할 수 없습니다."
+    ),
+    DELETED_USER_GROUP(
+        code = "USER06",
+        httpStatus = HttpStatus.FORBIDDEN,
+        message = "이미 삭제된 그룹입니다."
+    ),
+    NO_USER_GROUP_INVITE_CODE(
+        code = "USER07",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "그룹 코드는 필수 입력 항목입니다."
+    ),
+    INVALID_USER_GROUP_INVITE_CODE_SIZE(
+        code = "USER08",
+        httpStatus = HttpStatus.FORBIDDEN,
+        message = "유효하지 않은 그룹 코드입니다."
+    ),
+    GROUP_MAX_10_MEMBERS(
+        code = "USER09",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "한 그룹에 최대 10명까지 참여할 수 있습니다."
+    ),
+    USER_GROUP_NOT_FOUND_BY_INVITE_CODE(
+        code = "USER10",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "존재하지 않는 그룹입니다."
+    ),
+    ALREADY_JOINED_USER_GROUP(
+        code = "USER11",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "이미 참여 중인 그룹입니다."
+    ),
+    EXPIRED_INVITE_CODE(
+        code = "USER12",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "만료된 초대 코드입니다. 그룹의 기존 참여자에게 새로운 초대 코드를 요청하세요."
     )
 }
