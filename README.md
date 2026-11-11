@@ -28,20 +28,22 @@
 - 💸 배포·운영 비용을 최소화합니다.
 - 📜 카카오 정책에 따라 **카카오 플레이스 검색 결과는 DB에 저장하지 않습니다.**
 - 📦 중요한 파라미터는 쿼리스트링이 아닌 **요청 바디**로 전달합니다.
+- 🔒 사진은 **비공개 AWS S3 버킷**에 저장하고, 접근할 때마다 만료되는 **임시 URL**로만 주고받습니다.
 
 ---
 
 ## ✨ 주요 기능
 
-| 기능                       | 설명                                               | 상태    |
-|----------------------------|----------------------------------------------------|---------|
-| 🔐 인증/인가               | 소셜 로그인, JWT 토큰 재발급, 로그아웃             | ✅ 완료 |
-| ⚙️ 공통 인프라             | DB 세팅, 로깅, 전역 예외 처리, 공통 코드 관리      | ✅ 완료 |
-| 👥 그룹                    | 그룹 생성, 초대 코드 참여, 멤버 목록, 탈퇴         | ✅ 완료 |
-| 👫 커플 연결               | 두 사람이 하나의 공간을 공유                       | 🚧 예정 |
-| 📷 사진 업로드 & EXIF 추출 | 음식 사진의 촬영 시각·위치 정보 추출               | 🚧 예정 |
-| 📍 방문 장소 제안          | 카카오맵 API로 "이 장소를 방문하셨나요?" 후보 제안 | 🚧 예정 |
-| 📝 추억 기록               | 방문 장소별 메모와 그날의 분위기 기록              | 🚧 예정 |
+| 기능              | 설명                                               | 상태    |
+|-------------------|----------------------------------------------------|---------|
+| 🔐 인증/인가      | 소셜 로그인, JWT 토큰 재발급, 로그아웃             | ✅ 완료 |
+| ⚙️ 공통 인프라    | DB 세팅, 로깅, 전역 예외 처리, 공통 코드 관리      | ✅ 완료 |
+| 👥 그룹           | 그룹 생성, 초대 코드 참여, 멤버 목록, 탈퇴         | ✅ 완료 |
+| 🖼️ 파일 업로드    | S3 Presigned URL 직접 업로드, 고아 파일 정리       | ✅ 완료 |
+| 👤 마이페이지     | 프로필 조회, 프로필 사진·닉네임 변경, 회원탈퇴     | ✅ 완료 |
+| 🔎 EXIF 추출      | 프론트에서 촬영 시각·위치 추출 후 서버로 전달      | 🚧 예정 |
+| 📍 방문 장소 제안 | 카카오맵 API로 "이 장소를 방문하셨나요?" 후보 제안 | 🚧 예정 |
+| 📝 추억 기록      | 방문 장소별 메모와 그날의 분위기 기록              | 🚧 예정 |
 
 ### 🔐 인증/인가
 
@@ -66,7 +68,7 @@ sequenceDiagram
 
 **소셜 로그인:** 카카오와 구글 모두 인가 코드 방식으로 구현했습니다. 백엔드가 로그인 URL과 `state`를 발급하면서 `state`를 HttpOnly 쿠키로도 저장해 두고, 로그인 요청 시 쿠키 값과 비교해
 CSRF를 방지합니다. 토큰 교환에 쓰는 redirect URI는 클라이언트 입력이 아닌 서버 설정값만 사용합니다. 신규 사용자는 소셜 계정 정보로 자동 가입되며 닉네임은 중복을 검사한 랜덤 값으로 생성하고, 탈퇴한
-사용자는 같은 계정으로 다시 로그인할 수 없습니다.
+사용자는 탈퇴 후 60일 동안 같은 계정으로 로그인할 수 없고, 정리 스케줄러가 계정을 완전히 삭제한 뒤에는 새 사용자로 다시 가입할 수 있습니다.
 
 **토큰 발급과 저장:** access token은 15분, refresh token은 2일 동안 유효하며, `type` 클레임으로 용도를 구분하고 서명과 issuer를 검증합니다. access token은 응답
 body로 내려주고, refresh token은 HttpOnly 쿠키로 전달합니다. 쿠키는 운영 환경에서 `Secure` + `SameSite=None`, 로컬에서는 `Lax`로 설정합니다. DB에는 refresh
@@ -95,6 +97,45 @@ DB 값과 다르면 탈취된 토큰으로 간주해 저장된 토큰을 폐기�
 
 ---
 
+### 🖼️ 파일 업로드
+
+사진은 서버를 거치지 않고 프론트가 **S3에 직접 업로드**합니다. 서버는 업로드 권한이 담긴 임시 URL(Presigned URL)만 발급해서 트래픽과 비용을 줄였습니다.
+
+```mermaid
+sequenceDiagram
+    participant FE as 프론트
+    participant BE as 백엔드
+    participant S3 as AWS S3
+    FE ->> FE: EXIF 추출 → webp 압축
+    FE ->> BE: POST /api/files/presigned-url (파일 정보)
+    BE ->> BE: 개수·크기·형식 검증, image_file 저장
+    BE -->> FE: fileId, 업로드용 Presigned URL (10분)
+    FE ->> S3: PUT (압축된 파일 직접 업로드)
+    FE ->> BE: 메인 API 호출 (fileId 전달)
+    BE ->> S3: 업로드 완료 여부 확인 (HeadObject)
+    BE -->> FE: 처리 결과
+```
+
+**업로드 보안과 비용 통제:** 서버는 URL을 발급하기 전에 파일 개수(용도별 상한), 크기, 허용된 이미지 형식을 검증합니다. 발급하는 URL에는 `Content-Type`과 `Content-Length`가
+서명에 포함되어, 신고한 값과 다른 파일은 S3가 거부합니다. S3 키는 사용자가 정한 파일명이 아니라 `fileId`, 순번, 검증된 형식에서 정한 확장자로만 만들어 경로 조작과 특수문자 문제를 막았습니다.
+
+**비공개 저장과 조회:** 버킷은 퍼블릭 액세스를 모두 차단하고, 백엔드 전용 IAM 사용자에게 필요한 경로의 최소 권한만 부여했습니다. DB에는 URL이 아닌 `s3_key`만 저장하고, 조회할 때마다 10분짜리
+Presigned GET URL을 새로 만들어 내려줍니다. 메인 로직(예: 프로필 사진 변경)은 DB 행이 아니라 **S3에 객체가 실제로 존재하는지**까지 확인한 뒤에 반영합니다.
+
+**고아 파일 정리:** Presigned URL을 발급한 뒤 업로드하지 않았거나 어디에서도 사용하지 않는 파일은 스케줄러(30분 간격)가 정리합니다. 생성 후 1시간이 지났고 어디에서도 참조되지 않는 이미지만
+대상으로 하고, **S3 삭제가 성공한 경우에만 DB 행을 삭제**해 객체가 추적 불가능하게 남지 않도록 했습니다. S3 삭제는 이미 없는 객체에도 성공으로 응답하므로 재시도해도 안전하며, 파일마다 트랜잭션을 분리해
+한 건의 실패가 나머지에 영향을 주지 않습니다.
+
+### 👤 마이페이지와 회원탈퇴
+
+**마이페이지:** 프로필 조회, 프로필 사진 변경, 닉네임 변경(중복 불가, 2~10자)을 제공합니다. 프로필 사진 URL은 조회 시점에 임시 URL로 만들어 내려주며, 로그인·재발급 응답에도 같은 방식으로
+포함됩니다.
+
+**회원탈퇴:** 하나의 트랜잭션에서 참여 중인 모든 그룹에서 탈퇴하고(마지막 멤버였던 그룹은 함께 삭제), 계정을 탈퇴 상태로 바꾸고 refresh token을 폐기합니다. 이후 **60일이 지나면 스케줄러(매일
+새벽 4시)** 가 사용자가 올린 S3 객체와 이미지 행을 지운 뒤 계정을 완전히 삭제합니다. 하나라도 삭제에 실패하면 계정을 지우지 않고 다음 실행에서 다시 시도합니다.
+
+---
+
 ## 🛠️ 기술 스택
 
 | 구분          | 기술                                                     |
@@ -105,6 +146,8 @@ DB 값과 다르면 탈취된 토큰으로 간주해 저장된 토큰을 폐기�
 | Auth          | jjwt                                                     |
 | 외부 API 연동 | Spring HTTP Interface (RestClient)                       |
 | Logging       | kotlin-logging                                           |
+| Storage       | AWS S3 (AWS SDK v2, Presigned URL)                       |
+| Scheduling    | Spring `@Scheduled`                                      |
 
 ---
 
@@ -141,6 +184,55 @@ DB 값과 다르면 탈취된 토큰으로 간주해 저장된 토큰을 폐기�
 | `group_id`, `user_id` (PK) | 그룹 ID, 사용자 ID (복합 PK, `user_id` 별도 인덱스) |
 | `created_at`, `updated_at` | 그룹 참여 / 수정 시각                               |
 
+### `image_file`
+
+| 컬럼                          | 설명                                                        |
+|-------------------------------|-------------------------------------------------------------|
+| `file_id`, `file_seq_no` (PK) | 파일 묶음 ID, 묶음 안의 순번 (복합 PK)                      |
+| `user_id` (FK)                | 업로드한 사용자                                             |
+| `original_file_name`          | 사용자가 올린 원본 파일명 (표시용, S3 키에는 사용하지 않음) |
+| `s3_key`                      | S3 오브젝트 키                                              |
+| `size`, `content_type`        | 파일 크기, 형식                                             |
+| `identifier`                  | 용도 (`USER_IMAGE` 최대 1장 / `RECORD_IMAGE` 최대 5장)      |
+| `is_first_image`              | 대표 이미지 여부                                            |
+| `created_at`, `updated_at`    | 생성 / 수정 시각                                            |
+
+---
+
+### ERD
+
+```mermaid
+erDiagram
+    user ||--o{ user_group_member: "참여"
+    user_group ||--o{ user_group_member: "구성"
+    user ||--o{ image_file: "업로드 (FK)"
+    user }o..o| image_file: "프로필 사진 (file_id, 논리적 참조)"
+
+    user {
+        varchar user_id PK
+        varchar status
+        varchar oauth_provider
+        varchar nickname
+        varchar file_id
+    }
+    user_group {
+        varchar group_id PK
+        varchar name
+        varchar invite_code
+    }
+    user_group_member {
+        varchar group_id PK
+        varchar user_id PK
+    }
+    image_file {
+        varchar file_id PK
+        int file_seq_no PK
+        varchar user_id FK
+        varchar s3_key
+        varchar identifier
+    }
+```
+
 ---
 
 ## 🔌 API 목록
@@ -160,6 +252,11 @@ DB 값과 다르면 탈취된 토큰으로 간주해 저장된 토큰을 폐기�
 | GET    | `/api/groups/{groupId}/members`     | 🔑 access token       | 그룹 멤버 목록 조회                   |
 | GET    | `/api/groups/{groupId}/invite-code` | 🔑 access token       | 그룹 초대 코드 조회 (만료 시 갱신)    |
 | POST   | `/api/groups/join`                  | 🔑 access token       | 초대 코드로 그룹 참여                 |
+| POST   | `/api/files/presigned-url`          | 🔑 access token       | 업로드용 Presigned URL 발급           |
+| GET    | `/api/me`                           | 🔑 access token       | 마이페이지 조회                       |
+| PATCH  | `/api/me/image`                     | 🔑 access token       | 프로필 사진 변경                      |
+| PATCH  | `/api/me/nickname`                  | 🔑 access token       | 닉네임 변경                           |
+| DELETE | `/api/me`                           | 🔑 access token       | 회원탈퇴 (60일 후 완전 삭제)          |
 
 - **에러 응답**: `{ errCode, errName, errMsg, time }`
 - 인증이 필요한 API는 `Authorization: Bearer {accessToken}` 헤더 사용
