@@ -40,3 +40,22 @@ CREATE TABLE dundun.user_group_member
 );
 
 CREATE INDEX idx_user_group_member_user_id ON dundun.user_group_member (user_id);
+
+-- IMAGE_FILE
+CREATE TABLE dundun.image_file
+(
+    file_id            VARCHAR(50)  NOT NULL,
+    file_seq_no        INTEGER      NOT NULL,
+    user_id            VARCHAR(50)  NOT NULL,
+    original_file_name VARCHAR(255) NOT NULL,
+    s3_key             VARCHAR(500) NOT NULL UNIQUE,
+    size               BIGINT       NOT NULL,
+    content_type       VARCHAR(100) NOT NULL,
+    identifier         VARCHAR(100) NOT NULL, -- USER_IMAGE, RECORD_IMAGE
+    is_first_image     BOOLEAN      NOT NULL,
+    created_at         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT pk_image_file PRIMARY KEY (file_id, file_seq_no),
+    CONSTRAINT fk_image_file_user FOREIGN KEY (user_id) REFERENCES dundun.user (user_id)
+);

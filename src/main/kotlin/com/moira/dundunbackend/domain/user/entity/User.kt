@@ -1,7 +1,7 @@
 package com.moira.dundunbackend.domain.user.entity
 
 import com.moira.dundunbackend.domain.base.entity.BaseEntity
-import com.moira.dundunbackend.domain.user.dto.UserSimpleResponse
+import com.moira.dundunbackend.domain.user.dto.response.UserSimpleResponse
 import jakarta.persistence.*
 import org.hibernate.annotations.DynamicUpdate
 import java.time.LocalDateTime
@@ -62,11 +62,12 @@ class User(
         }
     }
 
-    fun toSimpleResponse(): UserSimpleResponse {
+    fun toSimpleResponse(imageUrl: String?): UserSimpleResponse {
         return UserSimpleResponse(
             userId = userId,
             role = role,
-            nickname = nickname
+            nickname = nickname,
+            imageUrl = imageUrl
         )
     }
 }

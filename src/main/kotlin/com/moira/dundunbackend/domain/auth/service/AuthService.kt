@@ -4,6 +4,7 @@ import com.moira.dundunbackend.domain.auth.dto.response.LoginResponse
 import com.moira.dundunbackend.domain.user.entity.UserRole
 import com.moira.dundunbackend.domain.user.entity.UserStatus
 import com.moira.dundunbackend.domain.user.repository.UserRepository
+import com.moira.dundunbackend.domain.user.service.UserService
 import com.moira.dundunbackend.global.auth.CookieHandler
 import com.moira.dundunbackend.global.auth.JwtProvider
 import com.moira.dundunbackend.global.auth.TokenType
@@ -16,6 +17,7 @@ import io.jsonwebtoken.ExpiredJwtException
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -25,6 +27,7 @@ class AuthService(
 
     // service
     private val loginTxService: LoginTxService,
+    private val userService: UserService,
 
     // utility
     private val cookieHandler: CookieHandler,
@@ -33,7 +36,7 @@ class AuthService(
     /**
      * 로그아웃
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     fun logout(httpReq: HttpServletRequest, httpRes: HttpServletResponse) {
         // 로그아웃은 완벽한 정합성을 요구하는 기능이 아니므로 refreshToken 혹은 userId가 null인 경우 예외 처리하지 않음.
         // 1. 쿠키에서 refreshToken 추출
@@ -96,10 +99,14 @@ class AuthService(
             expireSec = COOKIE_RTK_EXPIRE_SEC
         )
 
-        // 7. LoginResponse 리턴
+        // 7. 사용자의 프로필 사진 조회
+        var imageUrl: String? = null
+        user.fileId?.let { imageUrl = userService.getUserProfileImageUrl(user.userId, user.fileId!!) }
+
+        // 8. LoginResponse 리턴
         return LoginResponse(
             token = jwtProvider.getTokenResponse(newAccessToken),
-            user = user.toSimpleResponse()
+            user = user.toSimpleResponse(imageUrl)
         )
     }
 }

@@ -21,6 +21,8 @@ repositories {
 }
 
 dependencies {
+    // aws: s3
+    implementation("software.amazon.awssdk:s3:2.55.3")
     // db
     implementation("com.mysql:mysql-connector-j")
     // jwt

@@ -23,4 +23,7 @@ object CommonVariables {
 
     const val GROUP_JOIN_MAX_COUNT = 5
     const val GROUP_MEMBERS_MAX_COUNT = 10
+
+    const val S3_PRESIGNED_URL_EXPIRES_MIN = 10L
+    const val IMAGE_MAX_SIZE_BYTES = 1000 * 1000 * 2L // 2MB
 }

@@ -17,6 +17,7 @@ import com.moira.dundunbackend.global.common.CommonVariables.GROUP_MEMBERS_MAX_C
 import com.moira.dundunbackend.global.exception.CommonException
 import com.moira.dundunbackend.global.exception.ErrorCode
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.ZoneId
@@ -102,7 +103,7 @@ class UserGroupService(
     /**
      * 그룹 탈퇴
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED) // UserService > delete에서도 사용
     fun leave(userId: String, groupId: String) {
         // 1. UserGroup 조회
         val userGroup = userGroupRepository.selectUserGroupForLock(userId, groupId)

@@ -33,4 +33,14 @@ interface UserGroupMemberRepository : JpaRepository<UserGroupMember, UserGroupMe
     """
     )
     fun selectUserGroupMemberResponseList(userId: String, groupId: String): List<UserGroupMemberResponse>
+
+    @Query(
+        """
+        SELECT GM.groupId
+        FROM UserGroupMember GM
+        WHERE GM.userId = :userId
+        ORDER BY GM.groupId ASC
+    """
+    )
+    fun selectGroupIdListByUserId(userId: String): List<String>
 }

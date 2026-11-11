@@ -4,9 +4,11 @@ import com.moira.dundunbackend.domain.auth.component.KakaoLoginApiClient
 import com.moira.dundunbackend.domain.auth.dto.request.KakaoLoginRequest
 import com.moira.dundunbackend.domain.auth.dto.response.KakaoLoginUrlResponse
 import com.moira.dundunbackend.domain.auth.dto.response.LoginResponse
+import com.moira.dundunbackend.domain.image.repository.ImageFileRepository
 import com.moira.dundunbackend.domain.user.entity.UserOauthProvider
 import com.moira.dundunbackend.domain.user.entity.UserStatus
 import com.moira.dundunbackend.domain.user.repository.UserRepository
+import com.moira.dundunbackend.domain.user.service.UserService
 import com.moira.dundunbackend.global.auth.CookieHandler
 import com.moira.dundunbackend.global.auth.JwtProvider
 import com.moira.dundunbackend.global.common.CommonVariables.BEARER
@@ -28,10 +30,12 @@ import java.util.*
 @Service
 class KakaoLoginService(
     // repository
+    private val imageFileRepository: ImageFileRepository,
     private val userRepository: UserRepository,
 
     // service
     private val loginTxSerice: LoginTxService,
+    private val userService: UserService,
 
     // utility
     private val cookieHandler: CookieHandler,
@@ -148,10 +152,14 @@ class KakaoLoginService(
             expireSec = COOKIE_RTK_EXPIRE_SEC
         )
 
-        // 8. LoginResponse 리턴
+        // 8. 사용자의 프로필 사진 조회
+        var imageUrl: String? = null
+        user.fileId?.let { imageUrl = userService.getUserProfileImageUrl(user.userId, user.fileId!!) }
+
+        // 9. LoginResponse 리턴
         return LoginResponse(
             token = jwtProvider.getTokenResponse(accessToken),
-            user = user.toSimpleResponse()
+            user = user.toSimpleResponse(imageUrl)
         )
     }
 }

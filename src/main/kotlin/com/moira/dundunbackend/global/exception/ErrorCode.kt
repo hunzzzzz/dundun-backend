@@ -151,5 +151,67 @@ enum class ErrorCode(
         code = "USER12",
         httpStatus = HttpStatus.BAD_REQUEST,
         message = "만료된 초대 코드입니다. 그룹의 기존 참여자에게 새로운 초대 코드를 요청하세요."
-    )
+    ),
+    USER_NOT_FOUND(
+        code = "USER13",
+        httpStatus = HttpStatus.FORBIDDEN,
+        message = "존재하지 않는 사용자입니다."
+    ),
+    NO_USER_NICKNAME(
+        code = "USER14",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "닉네임은 필수 입력 항목입니다."
+    ),
+    INVALID_USER_NICKNAME_SIZE(
+        code = "USER15",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "닉네임은 2~10글자이어야 합니다."
+    ),
+    NO_USER_IMAGE_FILE_ID(
+        code = "USER16",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "이미지 파일 ID가 누락되었습니다."
+    ),
+    USING_NICKNAME(
+        code = "USER17",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "이미 사용 중인 닉네임입니다."
+    ),
+
+    // 파일
+    INVALID_FILE_COUNT(
+        code = "FILE01",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "업로드 가능한 파일 개수를 초과하였습니다."
+    ),
+    INVALID_REPRESENT_YN(
+        code = "FILE02",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "잘못된 파라미터 값입니다."
+    ),
+    S3_PRESIGNED_URL_CREATE_FAILED(
+        code = "FILE03",
+        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+        message = "AWS S3 Presigned Url 생성에 실패하였습니다."
+    ),
+    NOT_ALLOWED_EXTENSIONS(
+        code = "FILE04",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "허용하지 않는 확장자입니다."
+    ),
+    FILE_SIZE_EXCEEDED(
+        code = "FILE05",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "각 이미지 파일이 2MB를 초과할 수 없습니다."
+    ),
+    IMAGE_FILE_NOT_FOUND(
+        code = "FILE06",
+        httpStatus = HttpStatus.BAD_REQUEST,
+        message = "업로드한 이미지 파일이 존재하지 않습니다. 다시 시도해주세요."
+    ),
+    S3_CHECK_OBJECT_FAILED(
+        code = "FILE07",
+        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+        message = "AWS S3 객체 조회에 실패하였습니다."
+    ),
 }
